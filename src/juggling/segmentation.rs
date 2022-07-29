@@ -23,7 +23,6 @@ use curv::arithmetic::traits::*;
 use curv::elliptic::curves::{secp256_k1::Secp256k1, Point, Scalar};
 use curv::BigInt;
 use juggling::proof_system::{Helgamal, Helgamalsegmented, Witness};
-use rayon::prelude::*;
 
 use Errors::{self, ErrorDecrypting};
 
@@ -126,7 +125,7 @@ impl Msegmentation {
             .map(|_| Scalar::<Secp256k1>::random())
             .collect::<Vec<Scalar<Secp256k1>>>();
         let segmented_enc = (0..num_of_segments)
-            .into_par_iter()
+            .into_iter()
             .map(|i| {
                 //  let segment_i = mSegmentation::get_segment_k(secret,segment_size,i as u8);
                 Msegmentation::encrypt_segment_k(
@@ -193,14 +192,14 @@ impl Msegmentation {
     ) -> Result<Scalar<Secp256k1>, Errors> {
         let limit = 2u32.pow(*segment_size as u32);
         let test_ge_table = (1..limit)
-            .into_par_iter()
+            .into_iter()
             .map(|i| {
                 let test_fe = Scalar::<Secp256k1>::from(&BigInt::from(i));
                 G * &test_fe
             })
             .collect::<Vec<Point<Secp256k1>>>();
         let vec_secret = (0..DE_vec.DE.len())
-            .into_par_iter()
+            .into_iter()
             .map(|i| {
                 //   .expect("error decrypting");
                 Msegmentation::decrypt_segment(
